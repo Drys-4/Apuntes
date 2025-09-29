@@ -1,0 +1,18 @@
+Proceso Bisiesto1
+	Definir n Como Entero;
+	Definir i Como Entero;
+	Definir j Como Entero;
+	Definir k Como Entero;
+    Escribir "Ingrese el año:";
+    Leer n;
+		
+    i <- n mod 4;
+	j <- n mod 100;
+	k <- n mod 400;
+
+	si (((i == 0) Y (j <> 0)) O (K == 0)) Entonces
+		Escribir "Año bisiesto";
+	sino 
+		Escribir "El año no es bisiesto";
+	FinSi
+FinProceso
