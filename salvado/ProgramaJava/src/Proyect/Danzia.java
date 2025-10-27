@@ -1,0 +1,669 @@
+package Proyect;
+
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.NumberFormat;
+import java.util.Arrays;
+import java.util.ArrayList;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
+
+/**
+ * Danzia - Gestor de Torneo (6 equipos, 10 jornadas, 3 partidos/jornada)
+ *
+ * DISEÑO (Modern Swing Look):
+ * - Barra superior con degradado (azul → magenta) y logotipo junto al título.
+ * - Paleta de colores basada en tu referencia:
+ *   AZUL NOCHE  : #0E1830
+ *   BURDEOS     : #3B0B22
+ *   MAGENTA     : #B23C6D
+ *   CORAL       : #D17474
+ *   AZUL VIVO   : #2B84B6
+ * - Botones con bordes redondeados, hover y foco sutil.
+ * - Tablas con zebra striping y encabezados personalizados.
+ *
+ * FUNCIONALIDAD:
+ * - Calendario automático (round-robin doble) → 10 semanas, 3 partidos/semana.
+ * - El juez edita directamente “Puntos Local / Puntos Visitante” (0..100).
+ * - Clasificación Final (columnas): Posición, Equipo, Puntos, Victorias,
+ *   Derrotas, Empates, No jugados.
+ *   * Victoria = +1
+ *   * Empate (si no es 0-0) = +0.5 para cada equipo
+ *   * 0-0 = +0
+ * - Orden: Puntos desc, luego Victorias desc, luego Empates desc,
+ *          luego Derrotas asc, y finalmente alfabético por Equipo.
+ *
+ * REGLAS DE ACCESO:
+ * - admin  / admin4321  → crea/limpia el calendario (si NO hay resultados).
+ * - juez   / juezdanzia → introduce resultados.
+ * - usuario/ 1234       → solo ve la tabla final (pantalla completa).
+ * - Si no hay calendario, juez/usuario no pueden entrar.
+ * - Si no hay resultados, el usuario no puede entrar.
+ */
+
+public class Danzia extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
+
+    // Paleta de colores
+    private static final Color C_BG   = new Color(18, 25, 42);
+    private static final Color C_BG2  = new Color(25, 30, 50);
+    private static final Color C_HEAD = new Color(60, 30, 70);
+    private static final Color C_GRID = new Color(80, 40, 90);
+    private static final Color C_TEXT = Color.WHITE;
+    private static final Color C_ACCENT1 = new Color(43, 132, 182);
+    private static final Color C_ACCENT2 = new Color(178, 60, 109);
+
+    // Estado general
+    private String rolUsuario;
+    private boolean mostrandoDuelos = false;   // en modo usuario: qué tabla se muestra
+    private boolean isUpdatingModel = false;   // evita bucles al reflejar cambios en tablas
+
+    // UI principal
+    private JPanel contentPane, panelLogin, panelCentral, panelTablas, panelBotones;
+    private CardLayout cardLayout;
+    private JTextField textUser;
+    private JPasswordField txtPassword;
+    private JButton btnLogin, btnLogOut, btnCrearCalendario, btnLimpiar, btnAlternarVista;
+    private JLabel lblMensaje, lblTitulo;
+
+    // Tablas y modelos
+    private JTable tablaDuelos, tablaFinal;
+    private DefaultTableModel modeloDuelos, modeloFinal;
+    private JScrollPane scrollDuelos, scrollFinal;
+
+    // Datos del torneo
+    private final String[] equipos = {
+        "Rhythm Storm", "Souls in Motion", "Wild Rhythm",
+        "Tribal Energy", "Dance Shadows", "Infinity Motion"
+    };
+    private final java.util.List<Duelo> listaDuelos = new ArrayList<>();
+
+    // ---- MAIN ----
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            Danzia frame = new Danzia();
+            frame.setVisible(true);
+        });
+    }
+
+    // ---- CONSTRUCTOR ----
+    public Danzia() {
+        setTitle("Danzia Torneo");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(500, 300);
+        setLocationRelativeTo(null);
+
+        contentPane = new JPanel(new BorderLayout());
+        contentPane.setBackground(C_BG);
+        setContentPane(contentPane);
+
+        inicializarEncabezado();
+        inicializarCentro();
+
+        setMinimumSize(new Dimension(760, 420));
+    }
+
+    // Encabezado superior con degradado
+    private void inicializarEncabezado() {
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 10)) {
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                GradientPaint gp = new GradientPaint(0, 0, new Color(14, 24, 48), getWidth(), 0, C_ACCENT2);
+                g2.setPaint(gp);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+            }
+        };
+        lblTitulo = new JLabel("Danzia Torneo");
+        lblTitulo.setFont(lblTitulo.getFont().deriveFont(Font.BOLD, 22f));
+        lblTitulo.setForeground(C_TEXT);
+        header.add(lblTitulo);
+        contentPane.add(header, BorderLayout.NORTH);
+    }
+
+    // Centro con CardLayout: login y tablero principal
+    private void inicializarCentro() {
+        cardLayout = new CardLayout();
+        panelCentral = new JPanel(cardLayout);
+        panelCentral.setBackground(C_BG);
+        contentPane.add(panelCentral, BorderLayout.CENTER);
+
+        inicializarLogin();
+        inicializarTablas();
+        inicializarBotones();
+
+        panelCentral.add(panelLogin, "login");
+        panelCentral.add(panelTablas, "torneo");
+
+        cardLayout.show(panelCentral, "login");
+    }
+
+    // Login
+    private void inicializarLogin() {
+        panelLogin = new JPanel(new GridBagLayout());
+        panelLogin.setBackground(C_BG);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel lblUser = new JLabel("Usuario:");
+        lblUser.setForeground(C_TEXT);
+        gbc.gridx = 0; gbc.gridy = 0;
+        panelLogin.add(lblUser, gbc);
+
+        textUser = new JTextField(12);
+        gbc.gridx = 1;
+        panelLogin.add(textUser, gbc);
+
+        JLabel lblPassword = new JLabel("Contraseña:");
+        lblPassword.setForeground(C_TEXT);
+        gbc.gridx = 0; gbc.gridy = 1;
+        panelLogin.add(lblPassword, gbc);
+
+        txtPassword = new JPasswordField(12);
+        gbc.gridx = 1;
+        panelLogin.add(txtPassword, gbc);
+
+        btnLogin = crearBoton("Entrar");
+        btnLogin.addActionListener(this);
+        gbc.gridwidth = 2; gbc.gridx = 0; gbc.gridy = 2;
+        panelLogin.add(btnLogin, gbc);
+
+        lblMensaje = new JLabel("", SwingConstants.CENTER);
+        lblMensaje.setForeground(C_TEXT);
+        gbc.gridy = 3;
+        panelLogin.add(lblMensaje, gbc);
+    }
+
+    // Tablas y modelos
+    private void inicializarTablas() {
+        // Modelo de partidos: solo el juez puede editar columnas 3 y 4
+        modeloDuelos = new DefaultTableModel(
+            new Object[]{"Semana", "Equipo Local", "Equipo Visitante", "Puntos Local", "Puntos Visitante"}, 0) {
+            @Override public boolean isCellEditable(int row, int col) {
+                return "juez".equals(rolUsuario) && (col == 3 || col == 4);
+            }
+        };
+
+        // Modelo de clasificación
+        modeloFinal = new DefaultTableModel(
+            new Object[]{"Posición", "Equipo", "Puntos", "Victorias", "Derrotas", "Empate", "No jugados"}, 0) {
+            @Override public boolean isCellEditable(int row, int col) { return false; }
+        };
+
+        tablaDuelos = new JTable(modeloDuelos);
+        tablaFinal  = new JTable(modeloFinal);
+
+        aplicarEstiloTabla(tablaDuelos, true);
+        aplicarEstiloTabla(tablaFinal, false);
+
+        // Ajuste de columnas de la tabla final
+        tablaFinal.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        tablaFinal.getColumnModel().getColumn(0).setPreferredWidth(80);   // Posición
+        tablaFinal.getColumnModel().getColumn(1).setPreferredWidth(230);  // Equipo
+        for (int c = 2; c < tablaFinal.getColumnCount(); c++) {
+            tablaFinal.getColumnModel().getColumn(c).setPreferredWidth(110);
+        }
+
+        // Editor numérico 0..100 para juez
+        NumberFormatter intFmt = new NumberFormatter(NumberFormat.getIntegerInstance());
+        intFmt.setValueClass(Integer.class);
+        intFmt.setMinimum(0);
+        intFmt.setMaximum(100);
+        intFmt.setAllowsInvalid(false);
+        intFmt.setCommitsOnValidEdit(true);
+
+        JFormattedTextField tf = new JFormattedTextField();
+        tf.setFormatterFactory(new DefaultFormatterFactory(intFmt));
+        DefaultCellEditor intEditor = new DefaultCellEditor(tf);
+        tablaDuelos.getColumnModel().getColumn(3).setCellEditor(intEditor);
+        tablaDuelos.getColumnModel().getColumn(4).setCellEditor(intEditor);
+
+        // Recalcular clasificación tras edición del juez
+        modeloDuelos.addTableModelListener(e -> {
+            if (isUpdatingModel) return;
+            if (e.getType() == TableModelEvent.UPDATE && "juez".equals(rolUsuario)) {
+                actualizarDueloDesdeModelo(e.getFirstRow(), e.getLastRow());
+                actualizarClasificacion();
+            }
+        });
+
+        // Scroll panes
+        scrollDuelos = new JScrollPane(tablaDuelos);
+        scrollFinal  = new JScrollPane(tablaFinal);
+        for (JScrollPane sp : new JScrollPane[]{scrollDuelos, scrollFinal}) {
+            sp.getViewport().setBackground(C_BG);
+            sp.setBorder(BorderFactory.createLineBorder(C_GRID));
+        }
+
+        // Contenedor central
+        panelTablas = new JPanel(new BorderLayout(15, 15));
+        panelTablas.setBackground(C_BG);
+        panelTablas.add(new JPanel() {{ setBackground(C_BG); }}, BorderLayout.CENTER);
+    }
+
+    // Estilo de tablas y fusión visual de "Semana"
+    private void aplicarEstiloTabla(JTable tabla, boolean esDuelos) {
+        tabla.setBackground(C_BG2);
+        tabla.setForeground(C_TEXT);
+        tabla.setGridColor(C_GRID);
+        tabla.setRowHeight(26);
+        tabla.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        JTableHeader th = tabla.getTableHeader();
+        th.setBackground(C_HEAD);
+        th.setForeground(C_TEXT);
+        th.setReorderingAllowed(false);
+
+        DefaultTableCellRenderer center = new DefaultTableCellRenderer();
+        center.setHorizontalAlignment(SwingConstants.CENTER);
+        for (int i = 0; i < tabla.getColumnCount(); i++) {
+            tabla.getColumnModel().getColumn(i).setCellRenderer(center);
+        }
+
+        if (esDuelos) {
+            // Columna Semana: muestra número solo en la primera fila del bloque de 3
+            tabla.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+                    JLabel cell = (JLabel) super.getTableCellRendererComponent(t, v, s, f, r, c);
+                    cell.setHorizontalAlignment(SwingConstants.CENTER);
+                    cell.setBackground(C_BG2);
+                    cell.setForeground(C_TEXT);
+                    boolean primera = (r % 3 == 0);
+                    if (!primera) cell.setText("");
+                    int thick = (r % 3 == 2) ? 3 : 1;
+                    cell.setBorder(BorderFactory.createMatteBorder(0, 0, thick, 0, C_GRID));
+                    return cell;
+                }
+            });
+        }
+    }
+
+    // Botonera inferior
+    private void inicializarBotones() {
+        panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10)) {
+            @Override protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                GradientPaint gp = new GradientPaint(0, 0, new Color(14, 24, 48), getWidth(), 0, C_ACCENT1);
+                g2.setPaint(gp);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.dispose();
+            }
+        };
+
+        btnCrearCalendario = crearBoton("Crear calendario");
+        btnCrearCalendario.addActionListener(this);
+
+        btnLimpiar = crearBoton("Limpiar tablas");
+        btnLimpiar.addActionListener(this);
+
+        btnLogOut = crearBoton("Cerrar sesión");
+        btnLogOut.addActionListener(this);
+
+        // Un único botón para alternar en modo usuario
+        btnAlternarVista = crearBoton("Ver clasificación final");
+        btnAlternarVista.addActionListener(e -> alternarVista());
+
+        panelBotones.add(btnCrearCalendario);
+        panelBotones.add(btnLimpiar);
+        panelBotones.add(btnLogOut);
+        panelBotones.add(btnAlternarVista);
+
+        panelTablas.add(panelBotones, BorderLayout.SOUTH);
+    }
+
+    private JButton crearBoton(String txt) {
+        JButton b = new JButton(txt);
+        b.setBackground(C_ACCENT1);
+        b.setForeground(Color.WHITE);
+        b.setFocusPainted(false);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return b;
+    }
+
+    // Acciones de botones
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+        if (src == btnLogin) login();
+        else if (src == btnLogOut) logout();
+        else if (src == btnCrearCalendario) crearCalendario();
+        else if (src == btnLimpiar) limpiarTablas();
+    }
+
+    // Login / Logout
+    private void login() {
+        String usuario = textUser.getText().trim();
+        String pass = new String(txtPassword.getPassword()).trim();
+
+        if (usuario.equals("admin") && pass.equals("admin4321")) {
+            if (hayResultados()) {
+                JOptionPane.showMessageDialog(this, "No se puede crear calendario: ya hay resultados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            rolUsuario = "admin";
+            mostrarPanel(true);
+            mostrarLayoutAdminJuez();
+        } else if (usuario.equals("juez") && pass.equals("juezdanzia")) {
+            if (listaDuelos.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El calendario aún no fue creado.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            rolUsuario = "juez";
+            mostrarPanel(true);
+            mostrarLayoutAdminJuez();
+        } else if (usuario.equals("usuario") && pass.equals("1234")) {
+            if (listaDuelos.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El calendario aún no fue creado.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            if (!hayResultados()) {
+                JOptionPane.showMessageDialog(this, "Aún no hay resultados del juez.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            rolUsuario = "usuario";
+            mostrandoDuelos = false; // clasificación primero
+            mostrarPanel(true);
+            mostrarLayoutUsuario();
+        } else {
+            JOptionPane.showMessageDialog(this, "Datos incorrectos.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void logout() {
+        mostrarPanel(false);
+        textUser.setText("");
+        txtPassword.setText("");
+        rolUsuario = null;
+    }
+
+    // Mostrar/ocultar panel principal con tamaños adaptados
+    private void mostrarPanel(boolean mostrar) {
+        btnLogOut.setVisible(mostrar);
+        btnCrearCalendario.setVisible(mostrar && "admin".equals(rolUsuario));
+        btnLimpiar.setVisible(mostrar && "admin".equals(rolUsuario));
+        btnAlternarVista.setVisible("usuario".equals(rolUsuario));
+
+        if (mostrar) {
+            if ("usuario".equals(rolUsuario)) {
+                // Para usuario: pantalla completa y ajuste automático de columnas
+                setExtendedState(JFrame.MAXIMIZED_BOTH);
+                tablaFinal.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+                tablaDuelos.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+            } else {
+                // Para admin/juez: tamaño razonable para ver ambas tablas
+                setExtendedState(JFrame.NORMAL);
+                setSize(1200, 700);
+                setLocationRelativeTo(null);
+                tablaFinal.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+                tablaDuelos.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+            }
+            cardLayout.show(panelCentral, "torneo");
+        } else {
+            setExtendedState(JFrame.NORMAL);
+            setSize(520, 320);
+            setLocationRelativeTo(null);
+            cardLayout.show(panelCentral, "login");
+        }
+    }
+
+    // Layout para admin y juez: dos tablas lado a lado
+    private void mostrarLayoutAdminJuez() {
+        JPanel grid = new JPanel(new GridLayout(1, 2, 15, 0));
+        grid.setBackground(C_BG);
+        grid.add(scrollDuelos);
+        grid.add(scrollFinal);
+
+        panelTablas.remove(scrollDuelos);
+        panelTablas.remove(scrollFinal);
+        Component center = getCenter(panelTablas);
+        if (center != null) panelTablas.remove(center);
+        panelTablas.add(grid, BorderLayout.CENTER);
+        panelTablas.revalidate();
+        panelTablas.repaint();
+    }
+
+    // Layout para usuario: una tabla a la vez en pantalla completa
+    private void mostrarLayoutUsuario() {
+        panelTablas.remove(scrollDuelos);
+        panelTablas.remove(scrollFinal);
+        Component center = getCenter(panelTablas);
+        if (center != null) panelTablas.remove(center);
+
+        if (mostrandoDuelos) {
+            panelTablas.add(scrollDuelos, BorderLayout.CENTER);
+            btnAlternarVista.setText("Ver clasificación final");
+        } else {
+            panelTablas.add(scrollFinal, BorderLayout.CENTER);
+            btnAlternarVista.setText("Ver tabla de partidos");
+        }
+        panelTablas.revalidate();
+        panelTablas.repaint();
+    }
+
+    // Alternar en modo usuario
+    private void alternarVista() {
+        if (!"usuario".equals(rolUsuario)) return;
+        mostrandoDuelos = !mostrandoDuelos;
+        mostrarLayoutUsuario();
+    }
+
+    // Crear calendario (doble round-robin) y poblar tabla de duelos
+    private void crearCalendario() {
+        if (!listaDuelos.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ya existe un calendario.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        listaDuelos.clear();
+        modeloDuelos.setRowCount(0);
+
+        java.util.List<String> equiposList = new ArrayList<>(Arrays.asList(equipos));
+        int n = equiposList.size();
+        if (n % 2 != 0) equiposList.add("DESCANSO");
+
+        int rondas = n - 1;
+        int partidosPorRonda = n / 2;
+        java.util.List<java.util.List<String[]>> calendario = new ArrayList<>();
+        java.util.List<String> rot = new ArrayList<>(equiposList);
+
+        for (int r = 0; r < rondas; r++) {
+            java.util.List<String[]> pares = new ArrayList<>();
+            for (int i = 0; i < partidosPorRonda; i++) {
+                pares.add(new String[]{rot.get(i), rot.get(n - 1 - i)});
+            }
+            calendario.add(pares);
+            java.util.List<String> nuevo = new ArrayList<>();
+            nuevo.add(rot.get(0));
+            nuevo.add(rot.get(n - 1));
+            for (int i = 1; i < n - 1; i++) nuevo.add(rot.get(i));
+            rot = nuevo;
+        }
+
+        int semana = 1;
+        for (int r = 0; r < rondas * 2; r++) {
+            int dentro = 0;
+            for (String[] par : calendario.get(r % rondas)) {
+                if (!par[0].equals("DESCANSO") && !par[1].equals("DESCANSO")) {
+                    String local = (r < rondas) ? par[0] : par[1];
+                    String visitante = (r < rondas) ? par[1] : par[0];
+                    listaDuelos.add(new Duelo(semana, local, visitante));
+                    Object semanaVisible = (dentro == 0) ? semana : "";
+                    modeloDuelos.addRow(new Object[]{semanaVisible, local, visitante, 0, 0});
+                    dentro++;
+                }
+            }
+            semana++;
+        }
+
+        actualizarClasificacion(); // inicializa con No jugados = 10 por equipo
+        JOptionPane.showMessageDialog(this, "Calendario creado correctamente (10 semanas, 3 partidos/semana).");
+    }
+
+    // Actualiza objetos Duelo leyendo lo que el juez editó en el modelo
+    private void actualizarDueloDesdeModelo(int rowFirst, int rowLast) {
+        if (rowFirst < 0 || rowLast < 0) return;
+        isUpdatingModel = true;
+        try {
+            for (int r = rowFirst; r <= rowLast; r++) {
+                if (r < 0 || r >= listaDuelos.size()) continue;
+                Duelo d = listaDuelos.get(r);
+                Object vL = modeloDuelos.getValueAt(r, 3);
+                Object vV = modeloDuelos.getValueAt(r, 4);
+                int pL = parseSafeInt(vL, 0);
+                int pV = parseSafeInt(vV, 0);
+                d.localTotal = clamp(pL, 0, 100);
+                d.visitanteTotal = clamp(pV, 0, 100);
+                d.jugado = true;
+                // No escribimos de vuelta al modelo aquí para evitar bucles
+            }
+        } finally {
+            isUpdatingModel = false;
+        }
+    }
+
+    private int parseSafeInt(Object o, int def) {
+        if (o == null) return def;
+        try { return Integer.parseInt(o.toString().replaceAll("\\D", "")); }
+        catch (Exception ex) { return def; }
+    }
+    private int clamp(int v, int lo, int hi) { return Math.max(lo, Math.min(hi, v)); }
+
+    // Recalcular clasificación
+    private void actualizarClasificacion() {
+        modeloFinal.setRowCount(0);
+        int totalPartidos = 10;
+        int m = equipos.length;
+        int[] victorias = new int[m];
+        int[] derrotas  = new int[m];
+        int[] empates   = new int[m];
+        int[] jugados   = new int[m];
+        int[] puntos = new int[m];
+
+        for (Duelo d : listaDuelos) {
+            if (!d.jugado) continue;
+            int iL = Arrays.asList(equipos).indexOf(d.local);
+            int iV = Arrays.asList(equipos).indexOf(d.visitante);
+            if (iL == -1 || iV == -1) continue;
+
+            jugados[iL]++; jugados[iV]++;
+            if (d.localTotal > d.visitanteTotal) {
+                victorias[iL]++; derrotas[iV]++;
+                puntos[iL] = puntos[iL] + d.localTotal;
+                puntos[iV] = puntos[iV] + d.visitanteTotal;
+            } else if (d.visitanteTotal > d.localTotal) {
+                victorias[iV]++; derrotas[iL]++;
+                puntos[iL] = puntos[iL] + d.localTotal;
+                puntos[iV] = puntos[iV] + d.visitanteTotal;
+            } else if (d.localTotal > 0 || d.visitanteTotal > 0) {
+                empates[iL]++; empates[iV]++;
+                puntos[iL] = puntos[iL] + d.localTotal;
+                puntos[iV] = puntos[iV] + d.visitanteTotal;
+            }
+        }
+
+        java.util.List<Object[]> filas = new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            int noJugados = totalPartidos - jugados[i];
+            filas.add(new Object[]{0, equipos[i], puntos[i], victorias[i], derrotas[i], empates[i], noJugados});
+        }
+
+        filas.sort((a, b) -> {
+        	int cmp = Integer.compare((int) b[2], (int) a[2]); // puntos
+            if (cmp == 0) cmp = Integer.compare((int) b[3], (int) a[3]); // victorias
+            if (cmp == 0) cmp = Integer.compare((int) b[5], (int) a[5]); // empates
+            if (cmp == 0) cmp = Integer.compare((int) a[4], (int) b[4]); // menos derrotas
+            if (cmp == 0) cmp = ((String) a[1]).compareTo((String) b[1]); // alfabético
+            return cmp;
+        });
+
+        int pos = 1;
+        for (Object[] f : filas) {
+            f[0] = pos++;
+            modeloFinal.addRow(f);
+        }
+    }
+
+    // Limpiar tablas
+    private void limpiarTablas() {
+        if (listaDuelos.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay tablas que limpiar.", "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        if (hayResultados()) {
+            JOptionPane.showMessageDialog(this, "No se puede limpiar: existen resultados.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int confirm = JOptionPane.showConfirmDialog(this, "¿Seguro que deseas limpiar todas las tablas?", "Confirmación", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            listaDuelos.clear();
+            modeloDuelos.setRowCount(0);
+            modeloFinal.setRowCount(0);
+        }
+    }
+
+    private boolean hayResultados() {
+        return listaDuelos.stream().anyMatch(d -> d.jugado);
+    }
+
+    // Utilidad: obtener componente central actual de BorderLayout
+    private Component getCenter(Container c) {
+        LayoutManager lm = c.getLayout();
+        if (lm instanceof BorderLayout) {
+            return ((BorderLayout) lm).getLayoutComponent(BorderLayout.CENTER);
+        }
+        return null;
+    }
+
+    // Clase interna: Duelo
+    private static class Duelo {
+        String local, visitante;
+        int semana, localTotal, visitanteTotal;
+        boolean jugado;
+        Duelo(int semana, String local, String visitante) {
+            this.semana = semana;
+            this.local = local;
+            this.visitante = visitante;
+            this.localTotal = 0;
+            this.visitanteTotal = 0;
+            this.jugado = false;
+        }
+    }
+}
