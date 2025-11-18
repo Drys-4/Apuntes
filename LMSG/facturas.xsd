@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="facturas">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="facturas">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="codificatura" type="xs:string" />
+                            <xs:element name="fecha" type="xs:string" />
+                            <xs:element name="codigocliente" type="xs:string" />
+                            <xs:element name="nombrecliente" type="xs:string" />
+                            <xs:element name="articulo" maxOccurs="unbounded">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="codigoarticulo" type="xs:double" />
+                                        <xs:element name="nombrearticulo" type="xs:string" />
+                                        <xs:element name="preciounitario" type="xs:string" />
+                                        <xs:element name="unidades" type="xs:double" />
+                                        <xs:element name="total" type="xs:double" />
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="totalfactura" type="xs:double" />
+                            <xs:element name="iva" type="xs:double" />
+                            <xs:element name="totalconiva" type="xs:double" />
+                            <xs:element name="descuento" type="xs:double" />
+                            <xs:element name="total" />
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

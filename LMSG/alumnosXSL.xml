@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alumnos>
+   <alumno>
+      <nombre>Txema</nombre>
+      <apellidos>De Miguel</apellidos>
+      <grupo>1DW3</grupo>
+      <nota>5.0</nota>
+   </alumno>
+   <alumno>
+      <nombre>Pedro</nombre>
+      <apellidos>Lopes</apellidos>
+      <grupo>1DW2</grupo>
+      <nota>8.0</nota>
+   </alumno>
+   <alumno>
+      <nombre>Txema</nombre>
+      <apellidos>De Miguel</apellidos>
+      <grupo>1DW3</grupo>
+      <nota>5.0</nota>
+   </alumno>
+   <alumno>
+      <nombre>Paula</nombre>
+      <apellidos>Gonzalez</apellidos>
+      <grupo>1DW3</grupo>
+      <nota>l.o</nota>
+   </alumno>
+</alumnos>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Menu Adaptativo</title>
+        <link rel="icon" type="image/x-icon" href="Images/Logo.png"><!--Favicon-->
+        <link rel="stylesheet" href="menuAdaptativo.css"/>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+            $(document).ready(function (){
+                $("#inicio").click(function(){
+                    $(docunent).attr('title','- Aritz Lorenzo')
+                    $("#contenido").load("inicio.html");
+                });
+                 $("#listas").click(function(){
+                    $("#contenido").load("listas.html");
+                });
+                 $("#tablas").click(function(){
+                    $("#contenido").load("tablas.html");
+                });
+                 $("#multi").click(function(){
+                    $("#contenido").load("multi.html");
+                });
+                //cargar pagina de inicio
+                $("#contenido").load("inicio.html");
+            })
+        </script>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <div class="logo">
+                <img src="Images/Logo.png" alt="logo">
+                </div>
+                <ul class="nav-links">
+                <li><a id="main" href="menuAdaptativo.html">INICIO</a></li>
+                <li><a href="buildingBlocks.html">BLOCKES</a></li>
+                <li><a href="demo.html">DEMO</a></li>
+                |
+                <li><a href="listas.html">LISTA</a></li>
+                <li><a href="tablas.html">TABLA</a></li>
+                <li><a href="multi.html">MULTIMEDIA</a></li>
+                </ul>
+            </nav>
+        </header>
+        <section class="contenido">
+            <h2>📊 Tabla de datos</h2>
+            <table>
+                <thead>
+                    <tr><th>Producto</th><th>Precio</th><th>Stock</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Teclado</td><td>$25</td><td>Disponible</td></tr>
+                    <tr><td>Mouse</td><td>$15</td><td>Agotado</td></tr>
+                    <tr><td>Monitor</td><td>$120</td><td>Disponible</td></tr>
+                </tbody>
+            </table>
+            <h2>🖼️ Galería con Grid</h2>
+            <div class="galeria">
+                <div class="card"><img src="https://picsum.photos/200?1" alt=""><p>Imagen 1</p></div>
+                <div class="card"><img src="https://picsum.photos/200?3" alt=""><p>Imagen 3</p></div>
+                <div class="card"><img src="https://picsum.photos/200?4" alt=""><p>Imagen 4</p></div>
+            </div>
+        </section>
+        <aside>
+            <h2>Secciones y estructura</h2>
+            <h3>Artículo</h3>
+            <p>Contenido dentro de un artículo.</p>
+            <p>Esto es un contenido lateral o nota.</p>
+        </aside>
+        <footer>
+            <p>&copy; 2025 Demostración HTML + CSS — Creado para práctica educativa</p>
+        </footer>
+    </body>
+</html>

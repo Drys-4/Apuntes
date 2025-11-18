@@ -1,0 +1,159 @@
+/* 🎨 STYLES COMPLETO CON COMENTARIOS */
+
+/* 🔹 RESET GENERAL */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 🔹 ESTILO GLOBAL */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: #333;
+    background-color: #f4f4f4;
+    line-height: 1.6;
+}
+
+/* 🔹 ENCABEZADO Y NAVEGACIÓN */
+header {
+    background-color: #b32727;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* 🔹 SECCIONES GENERALES */
+section {
+    background: white;
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* 🔹 TIPOGRAFÍA */
+h1, h2, h3 {
+    font-weight: bold;
+    color: #222;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+/* 🔹 TABLAS */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+/* 🔹 FORMULARIOS */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, textarea, select, button {
+    padding: 8px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+/* 🔹 MULTIMEDIA */
+img, video, audio {
+    display: block;
+    margin: 10px 0;
+    max-width: 100%;
+}
+
+/* 🔹 FLEXBOX */
+.flex-demo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 🔹 GRID */
+.grid-demo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+/* 🔹 ANIMACIÓN */
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.fade {
+    animation: fadeIn 1s ease-in;
+}
+
+/* 🔹 TRANSICIONES */
+a, button {
+    transition: all 0.3s ease;
+}
+
+/* 🔹 RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    body {
+        background-color: #e0f7fa;
+    }
+
+    nav {
+        display: flex;
+        flex-direction: column;
+    }
+
+    section {
+        padding: 10px;
+    }
+}
+
+/* 🔹 EFECTOS Y TRANSFORMACIONES */
+img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* 🔹 PIE DE PÁGINA */
+footer {
+    background-color: #222;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}

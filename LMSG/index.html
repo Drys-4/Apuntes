@@ -1,47 +1,157 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="content-type" content="text/html"; charset="UTF-8">
-        <link rel="stylesheet" href="stile.css">
-    </head>
-    <body>
-         
-        <h1>title</h1>
-        <p>Hola hola</p>
-        <p><a href="hola.html">aqui</a></p>
-        <p><a href="Ejercicios de HTML5.pdf">PDF</a></p>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ejemplo completo de todas las etiquetas HTML">
+    <title>Ejemplo Completo HTML</title>
+    <link rel="stylesheet" href="styleTeoria.css">
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        section { margin-bottom: 40px; }
+        img { max-width: 150px; }
+    </style>
+</head>
+<body>
 
-        <table>
-            <tr>
-                <th></th>
-                <th></th>
-                <th>Evaluacion</th>
-            </tr>
-            <tr>
-                <th></th>
-                <th></th>
-                <th>Evaluacion 1</th>
-                <th>Evaluacion 1</th>
-                <th>Evaluacion 1</th>
-            </tr>
-            <tr>
-                <th>Alumnos</th>
-                <th>Alumno 1</th>
-                <td>9</td>
-                <td>7</td>
-            </tr>
-            <tr>
-                <th>Alumnos</th>
-                <td>8</td>
-                <td>8</td> 
-                <td>5</td>
-            </tr>
-            <tr>
-                <th>Alumnos</th>
-                <td>9</td>
-                <td>9</td>
-                <td>9</td>
-            </tr>
+<header>
+    <h1>Todas las etiquetas HTML</h1>
+    <nav>
+        <a href="#texto">Texto</a> |
+        <a href="#listas">Listas</a> |
+        <a href="#tablas">Tablas</a> |
+        <a href="#formularios">Formularios</a> |
+        <a href="buildingBlocks.html">Building Blocks</a>
+    </nav>
+</header>
+
+<main>
+    <section id="texto">
+        <h2>Texto y formato</h2>
+        <p>Este es un párrafo con <b>negrita</b>, <strong>importante</strong>, <i>cursiva</i> y <em>énfasis</em>.</p>
+        <p>Texto con <mark>resaltado</mark>, <small>pequeño</small>, <del>eliminado</del> y <ins>insertado</ins>.</p>
+        <p>Fórmula: H<sub>2</sub>O o E = mc<sup>2</sup></p>
+        <hr>
+        <pre>Texto    preformateado
+con espacios y saltos.</pre>
+    </section>
+
+    <section>
+        <h2>Secciones y estructura</h2>
+        <article>
+            <h3>Artículo</h3>
+            <p>Contenido dentro de un artículo.</p>
+        </article>
+        <aside>
+            <p>Esto es un contenido lateral o nota.</p>
+        </aside>
+    </section>
+
+    <section>
+        <h2>Multimedia</h2>
+        <figure>
+            <img src="https://via.placeholder.com/150" alt="Ejemplo">
+            <figcaption>Figura con descripción</figcaption>
+        </figure>
+        <audio controls>
+            <source src="audio.mp3" type="audio/mpeg">
+            Tu navegador no soporta audio.
+        </audio>
+        <video controls width="250">
+            <source src="video.mp4" type="video/mp4">
+            Tu navegador no soporta video.
+        </video>
+    </section>
+
+    <section>
+        <h2>Enlaces e imágenes con mapa</h2>
+        <a href="https://www.google.com" target="_blank">Ir a Google</a>
+        <br><br>
+        <img src="https://via.placeholder.com/200" usemap="#mapa" alt="Mapa ejemplo">
+        <map name="mapa">
+            <area shape="rect" coords="0,0,100,100" href="https://openai.com" alt="OpenAI">
+        </map>
+    </section>
+
+    <section id="listas">
+        <h2>Listas</h2>
+        <ul>
+            <li>Elemento sin orden</li>
+            <li>Otro elemento</li>
+        </ul>
+        <ol>
+            <li>Primero</li>
+            <li>Segundo</li>
+        </ol>
+        <dl>
+            <dt>HTML</dt>
+            <dd>Lenguaje de marcado de hipertexto</dd>
+        </dl>
+    </section>
+
+    <section id="tablas">
+        <h2>Tablas</h2>
+        <table border="1">
+            <caption>Ejemplo de tabla</caption>
+            <thead>
+                <tr><th>Nombre</th><th>Edad</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Ana</td><td>25</td></tr>
+                <tr><td>Juan</td><td>30</td></tr>
+            </tbody>
+            <tfoot>
+                <tr><td colspan="2">Total de personas: 2</td></tr>
+            </tfoot>
         </table>
-    </body>
+    </section>
+
+    <section id="formularios">
+        <h2>Formularios</h2>
+        <form>
+            <fieldset>
+                <legend>Datos personales</legend>
+                <label>Nombre: <input type="text" name="nombre"></label><br>
+                <label>Edad: <input type="number" name="edad"></label><br>
+                <label>Mensaje:<br><textarea></textarea></label><br>
+                <label>País:
+                    <select>
+                        <option>España</option>
+                        <option>México</option>
+                    </select>
+                </label><br>
+                <label>Color favorito: <input type="color"></label><br>
+                <meter value="0.7">70%</meter>
+                <progress value="50" max="100"></progress><br>
+                <button type="submit">Enviar</button>
+            </fieldset>
+        </form>
+    </section>
+
+    <section>
+        <h2>Detalles y elementos avanzados</h2>
+        <details>
+            <summary>Ver más información</summary>
+            <p>Esto se puede desplegar.</p>
+        </details>
+        <time datetime="2025-11-01">1 de noviembre de 2025</time>
+        <dialog open>Esto es un cuadro de diálogo.</dialog>
+        <template id="plantilla">
+            <p>Plantilla oculta.</p>
+        </template>
+    </section>
+
+    <section>
+        <h2>Obsoletos (solo demostración)</h2>
+        <font color="red">Texto rojo (obsoleto)</font><br>
+        <center>Texto centrado (usar CSS)</center><br>
+        <marquee>Texto en movimiento (no recomendado)</marquee>
+    </section>
+</main>
+
+<footer>
+    <p>&copy; 2025 Ejemplo Completo HTML</p>
+</footer>
+
+</body>
 </html>

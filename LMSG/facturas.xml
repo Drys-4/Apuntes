@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facturas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="facturas.xsd">
+    <facturas>
+        <codificatura>1</codificatura>
+        <fecha>18/11/2025</fecha>
+        <codigocliente>44444444D</codigocliente>
+        <nombrecliente>Bartolo López</nombrecliente>
+        <articulo>
+            <codigoarticulo>5</codigoarticulo>
+            <nombrearticulo>Teclado USB</nombrearticulo>
+            <preciounitario>20.0</preciounitario>
+            <unidades>2</unidades>
+            <total>40.00</total>
+        </articulo>
+        <articulo>
+            <codigoarticulo>3</codigoarticulo>
+            <nombrearticulo>Ratón USB</nombrearticulo>
+            <preciounitario>6.0</preciounitario>
+            <unidades>4</unidades>
+            <total>24.00</total>
+        </articulo>
+        <totalfactura>64.00</totalfactura>
+        <iva>21.0</iva>
+        <totalconiva>77.44</totalconiva>
+        <descuento>5.0</descuento>
+        <total></total>
+    </facturas>
+</facturas>

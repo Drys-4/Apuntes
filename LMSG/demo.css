@@ -1,0 +1,232 @@
+/* RESET Y BASE */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #e0eafc 0%, #cfdef3 100%);
+    color: #333;
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+
+/* 🔹 HERO / HEADER */
+.hero {
+    background: linear-gradient(120deg, #4f46e5, #3b82f6);
+    color: white;
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.hero .btn {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: white;
+    color: #3b82f6;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.hero .btn:hover {
+    background-color: #3b82f6;
+    color: white;
+}
+
+/* 🔹 NAVBAR */
+.navbar {
+    position: sticky;
+    top: 0;
+    background-color: #222;
+    z-index: 1000;
+    padding: 13px;
+    height: 60px;
+}
+
+
+.navbar ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    gap: 30px;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.navbar a:hover {
+    color: #60a5fa;
+}
+
+/* 🔹 SECCIONES GENERALES */
+section {
+    background: white;
+    margin: 40px auto;
+    padding: 30px;
+    width: calc(80% - 20px);
+    max-width: 1000px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+    margin-bottom: 15px;
+    color: #2563eb;
+}
+
+/* 🖼️ GALERÍA GRID */
+.galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: #f3f4f6;
+    border-radius: 10px;
+    text-align: center;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 📊 TABLAS */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #3b82f6;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 📝 FORMULARIO */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input, textarea, button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #bbb;
+}
+
+button {
+    background-color: #2563eb;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #1e40af;
+}
+
+/* 💫 ANIMACIONES */
+.animaciones-demo {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.caja {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: #93c5fd;
+    color: white;
+    font-weight: bold;
+}
+
+.girar { animation: girar 3s linear infinite; }
+.mover { animation: mover 2s ease-in-out infinite alternate; }
+.brillar { animation: brillar 2s ease-in-out infinite alternate; }
+
+@keyframes girar {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes mover {
+    from { transform: translateX(0); }
+    to { transform: translateX(30px); }
+}
+
+@keyframes brillar {
+    from { box-shadow: 0 0 10px #60a5fa; }
+    to { box-shadow: 0 0 30px #3b82f6; }
+}
+
+/* 🧱 FLEXBOX DEMO */
+.flex-demo {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    background-color: #f1f5f9;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.flex-demo div {
+    background-color: #3b82f6;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    flex: 1;
+    text-align: center;
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width: 700px) {
+    .navbar ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .hero {
+        padding: 60px 10px;
+    }
+    .caja {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+/* 🔹 FOOTER */
+footer {
+    background-color: #1f2937;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-top: 40px;
+}
